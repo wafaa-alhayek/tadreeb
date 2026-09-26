@@ -1,24 +1,40 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { companies, decodeCert, gradeLabel, majors } from '../data.js'
+import { companies, majors } from '../data.js'
 import { useLang } from '../i18n.jsx'
 import { useStore } from '../store.jsx'
 import { LangButton } from '../App.jsx'
+import { gradeLabel } from '../lib/verify.js'
+import { decodeCert, publicKeyFingerprint, verifyCert } from '../lib/signing.js'
 
-// Public page opened by the QR code on a certificate
+// Public page opened by the QR code on a certificate. It checks the university's
+// digital signature, so it works on any device and detects any edited field.
 export default function Verify() {
   const { t, L } = useLang()
   const { state } = useStore()
   const { certId } = useParams()
+  const [params] = useSearchParams()
   const navigate = useNavigate()
   const [input, setInput] = useState(certId || '')
-  const [params] = useSearchParams()
-  const fromLink = params.get('d') && decodeCert(params.get('d'))
-  // Look the number up locally first; fall back to the data carried in the QR link
-  const cert =
-    certId &&
-    (state.certificates.find((c) => c.id === certId.trim()) ||
-      (fromLink && fromLink.id === certId ? fromLink : null))
+  const [result, setResult] = useState({ key: null, ok: null })
+
+  const d = params.get('d')
+  const fromLink = d && decodeCert(d)
+  const local = certId && state.certificates.find((c) => c.id === certId.trim())
+  const cert = fromLink && fromLink.id === certId ? fromLink : local
+  const sig = params.get('s') || local?.sig
+  const key = cert ? `${certId}|${d}|${sig}` : null
+  const valid = result.key === key ? result.ok : null
+
+  useEffect(() => {
+    let alive = true
+    if (cert && sig) verifyCert(cert, sig).then((ok) => alive && setResult({ key, ok }))
+    return () => {
+      alive = false
+    }
+    // key captures everything the check depends on
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key])
 
   return (
     <div className="login">
@@ -35,19 +51,21 @@ export default function Verify() {
             navigate('/verify/' + input.trim())
           }}
         >
-          <input
-            placeholder="TR-2026-0001"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            aria-label={t('certNumber')}
-          />
+          <input placeholder="TR-2026-0001" value={input} onChange={(e) => setInput(e.target.value)} aria-label={t('certNumber')} />
           <button className="btn primary">{t('verify')}</button>
         </form>
 
         {certId && !cert && <div className="elig no">✕ {t('certInvalid')}</div>}
         {cert && (
-          <div className="cert">
-            <div className="elig ok">✓ {t('certValid')}</div>
+          <div className={'cert' + (valid === false ? ' forged' : '')}>
+            {valid === null && <div className="elig warn">{t('v_checking')}</div>}
+            {valid === true && <div className="elig ok big-verdict">✓ {t('v_valid')}</div>}
+            {valid === false && (
+              <div className="elig no big-verdict">
+                <strong>⚠ {t('v_forged')}</strong>
+                <div>{t('v_forgedDetail')}</div>
+              </div>
+            )}
             <h2>{t('universityName')}</h2>
             <dl className="cert-grid">
               <dt>{t('student')}</dt>
@@ -60,16 +78,28 @@ export default function Verify() {
               <dd>{L(companies[cert.companyId])}</dd>
               <dt>{t('duration')}</dt>
               <dd>
-                {cert.durationMonths} {t('months')} · {cert.hours} {t('hoursUnit')}
+                {cert.durationMonths} {t('months')}
+              </dd>
+              <dt>{t('hours')}</dt>
+              <dd>
+                {cert.hours} {t('v_hoursNote')}
               </dd>
               <dt>{t('result')}</dt>
-              <dd>
+              <dd className={valid === false ? 'bad' : ''}>
                 {L(gradeLabel(cert.score))} ({cert.score}%)
               </dd>
               <dt>{t('certNumber')}</dt>
               <dd>{cert.id}</dd>
               <dt>{t('issuedOn')}</dt>
               <dd>{cert.issuedOn}</dd>
+              <dt>{t('cert_fingerprint')}</dt>
+              <dd>
+                <code>{cert.fingerprint?.slice(0, 24)}…</code>
+              </dd>
+              <dt>{t('v_key')}</dt>
+              <dd>
+                <code>{publicKeyFingerprint}</code>
+              </dd>
             </dl>
           </div>
         )}

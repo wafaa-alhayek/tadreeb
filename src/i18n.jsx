@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { extra } from './strings-verify.js'
 
 const dict = {
   ar: {
@@ -260,6 +261,8 @@ const dict = {
     approvedCount: '{n} earlier approved logs',
   },
 }
+
+for (const lang of ['ar', 'en']) Object.assign(dict[lang], extra[lang])
 
 const LangContext = createContext(null)
 

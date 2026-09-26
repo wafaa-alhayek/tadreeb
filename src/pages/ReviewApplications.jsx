@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { companies, opportunities, users } from '../data.js'
 import { useLang } from '../i18n.jsx'
 import { useStore } from '../store.jsx'
-import { StatusBadge } from './MyApplications.jsx'
+import { StatusBadge } from '../components.jsx'
 
 const supervisors = users.filter((u) => u.role === 'supervisor')
 
@@ -36,6 +36,7 @@ function Actions({ app }) {
     case 'accepted':
       return (
         <div className="actions">
+          {app.companyRejected && <small className="bad">⚠ {t('companyRejectedNote')}</small>}
           <select value={sup} onChange={(e) => setSup(e.target.value)} aria-label={t('supervisor')}>
             {supervisors.map((s) => (
               <option key={s.id} value={s.id}>

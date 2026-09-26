@@ -1,14 +1,11 @@
 import { companies, opportunities } from '../data.js'
 import { useLang } from '../i18n.jsx'
 import { useStore } from '../store.jsx'
+import { StatusBadge } from '../components.jsx'
 
 // The application lifecycle, in order, for the progress stepper
-export const STEPS = ['submitted', 'under_review', 'accepted', 'assigned']
+export const STEPS = ['submitted', 'under_review', 'accepted', 'assigned', 'active']
 
-export function StatusBadge({ status }) {
-  const { t } = useLang()
-  return <span className={'badge s-' + status}>{t('status_' + status)}</span>
-}
 
 export default function MyApplications() {
   const { t, L } = useLang()
@@ -22,7 +19,7 @@ export default function MyApplications() {
       <div className="stack">
         {mine.map((a) => {
           const op = opportunities.find((o) => o.id === a.oppId)
-          const idx = STEPS.indexOf(a.status)
+          const idx = a.status === 'completed' ? STEPS.length - 1 : STEPS.indexOf(a.status)
           return (
             <article key={a.id} className="card">
               <div className="row between">

@@ -1,4 +1,5 @@
-import { baseline, initialState } from '../data.js'
+import { baseline } from '../data.js'
+import { hoursSummary } from '../lib/verify.js'
 import { useLang } from '../i18n.jsx'
 import { useStore } from '../store.jsx'
 
@@ -27,9 +28,10 @@ export default function Dashboard() {
 
   // Changes made during the demo, on top of the institution-wide baseline
   const count = (list, pred) => list.filter(pred).length
-  const liveApps = state.applications.filter((a) => !initialState.applications.some((s) => s.id === a.id))
-  const newRecords = state.records.length - initialState.records.length
-  const newCerts = state.certificates.length - initialState.certificates.length
+  const liveApps = state.applications.filter((a) => a.history)
+  const newRecords = state.records.filter((r) => !['r-yazan', 'r-lana'].includes(r.id)).length
+  const newCerts = state.certificates.filter((c) => c.recordId).length
+  const liveCounted = state.records.reduce((a, r) => a + hoursSummary(r).counted, 0)
 
   const stats = [
     ['stat_students', fmt(baseline.students)],
@@ -41,7 +43,8 @@ export default function Dashboard() {
     ['stat_companies', fmt(baseline.companies)],
     ['stat_opportunities', fmt(baseline.opportunities)],
     ['stat_attendance', fmt(baseline.attendance) + '%'],
-    ['stat_pendingLogs', fmt(state.records.flatMap((r) => r.logs).filter((l) => l.status === 'pending').length)],
+    ['stat_verifiedHours', fmt(Math.round(baseline.hours.counted + liveCounted))],
+    ['stat_pendingLogs', fmt(state.records.flatMap((r) => r.logs).filter((l) => l.company === 'pending' || l.academic === 'pending').length)],
   ]
 
   const statusRows = Object.entries(baseline.byStatus).map(([s, n]) => ({

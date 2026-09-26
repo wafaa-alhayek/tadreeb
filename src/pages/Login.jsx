@@ -18,24 +18,30 @@ export default function Login() {
         <h1>{t('appName')}</h1>
         <p className="muted">{t('tagline')}</p>
         <h2>{t('loginTitle')}</h2>
-        <div className="user-list">
-          {loginUsers.map((u) => (
-            <button
-              key={u.id}
-              className="user-pick"
-              onClick={() => {
-                login(u.id)
-                navigate('/')
-              }}
-            >
-              <span className="avatar">{L(u.name).replace('د. ', '').charAt(0)}</span>
-              <span>
-                <strong>{L(u.name)}</strong>
-                <small>{t('role_' + u.role)}</small>
-              </span>
-            </button>
-          ))}
-        </div>
+        {[
+          ['loginStudents', loginUsers.filter((u) => u.role === 'student')],
+          ['loginStaff', loginUsers.filter((u) => u.role !== 'student')],
+        ].map(([title, list]) => (
+          <div key={title} className="user-list">
+            <h3 className="group-title">{t(title)}</h3>
+            {list.map((u) => (
+              <button
+                key={u.id}
+                className="user-pick"
+                onClick={() => {
+                  login(u.id)
+                  navigate('/')
+                }}
+              >
+                <span className="avatar">{L(u.name).replace(/^(د|م)\. /, '').charAt(0)}</span>
+                <span>
+                  <strong>{L(u.name)}</strong>
+                  <small>{u.stageHint ? `${t('role_student')} · ${t('hint_' + u.stageHint)}` : t('role_' + u.role)}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+        ))}
         <p className="hint">{t('loginHint')}</p>
         <div className="login-foot">
           <Link to="/verify">{t('verifyLink')}</Link>

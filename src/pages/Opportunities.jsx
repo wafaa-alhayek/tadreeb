@@ -1,17 +1,19 @@
-import { checkEligibility, companies, majors, opportunities } from '../data.js'
+import { checkEligibility, companies, courses, majors, opportunities, students, userById } from '../data.js'
 import { useLang } from '../i18n.jsx'
 import { useStore } from '../store.jsx'
 
 export default function Opportunities() {
   const { t, L } = useLang()
   const { state, userId, apply } = useStore()
+  const major = students[userId].major
+  const rules = state.rules[major]
 
   return (
     <>
       <h1>{t('nav_opportunities')}</h1>
       <div className="grid">
         {opportunities.map((op) => {
-          const elig = checkEligibility(userId, op)
+          const elig = checkEligibility(userId, op, state.rules)
           const applied = state.applications.some(
             (a) => a.studentId === userId && a.oppId === op.id,
           )
@@ -39,17 +41,23 @@ export default function Opportunities() {
                 <summary>{t('requirements')}</summary>
                 <ul>
                   <li>
-                    {t('minHours')}: {op.requirements.minHours}
-                  </li>
-                  <li>
                     {t('majors')}: {op.requirements.majors.map((m) => L(majors[m])).join('، ')}
                   </li>
-                  {op.requirements.courses.length > 0 && (
+                  <li>
+                    {t('minHours')}: {rules.minHours}
+                  </li>
+                  <li>
+                    {t('rules_minGpa')}: {rules.minGpa}
+                  </li>
+                  {rules.courses.length > 0 && (
                     <li>
-                      {t('courses')}: {op.requirements.courses.join(', ')}
+                      {t('courses')}: {rules.courses.map((c) => L(courses[major][c])).join('، ')}
                     </li>
                   )}
                 </ul>
+                <small>
+                  {t('rules_setBy', { name: L(userById(rules.updatedBy).name), major: L(majors[major]) })}
+                </small>
               </details>
               <div className={'elig ' + (elig.ok ? 'ok' : 'no')}>
                 <strong>{elig.ok ? '✓ ' + t('eligible') : '✕ ' + t('notEligible')}</strong>

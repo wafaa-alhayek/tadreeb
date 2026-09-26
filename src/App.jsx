@@ -8,7 +8,11 @@ import MyApplications from './pages/MyApplications.jsx'
 import TrainingRecord from './pages/TrainingRecord.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import ReviewApplications from './pages/ReviewApplications.jsx'
-import SupervisorLogs from './pages/SupervisorLogs.jsx'
+import SupervisorStudents from './pages/SupervisorStudents.jsx'
+import CompanyInterns from './pages/CompanyInterns.jsx'
+import AttendanceCode from './pages/AttendanceCode.jsx'
+import VerificationCenter from './pages/VerificationCenter.jsx'
+import EligibilityRules from './pages/EligibilityRules.jsx'
 import Verify from './pages/Verify.jsx'
 import Completion from './pages/Completion.jsx'
 import Certificate from './pages/Certificate.jsx'
@@ -22,12 +26,20 @@ const navByRole = {
   officer: [
     ['/dashboard', 'nav_dashboard'],
     ['/review', 'nav_review'],
+    ['/verification', 'nav_verification'],
     ['/completion', 'nav_completion'],
   ],
-  supervisor: [['/logs', 'nav_logs']],
+  supervisor: [
+    ['/students', 'nav_students'],
+    ['/rules', 'nav_rules'],
+  ],
+  company: [
+    ['/interns', 'nav_interns'],
+    ['/code', 'nav_code'],
+  ],
 }
 
-const homeByRole = { student: '/opportunities', officer: '/dashboard', supervisor: '/logs' }
+const homeByRole = { student: '/record', officer: '/dashboard', supervisor: '/students', company: '/interns' }
 
 export function LangButton() {
   const { t, toggle } = useLang()
@@ -58,7 +70,7 @@ function RoleSwitcher() {
     >
       {loginUsers.map((u) => (
         <option key={u.id} value={u.id}>
-          {L(u.name)} — {t('role_' + u.role)}
+          {L(u.name)} — {u.stageHint ? t('hint_' + u.stageHint) : t('role_' + u.role)}
         </option>
       ))}
     </select>
@@ -112,7 +124,11 @@ export default function App() {
           <Route path="/record" element={<TrainingRecord />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/review" element={<ReviewApplications />} />
-          <Route path="/logs" element={<SupervisorLogs />} />
+          <Route path="/students" element={<SupervisorStudents />} />
+          <Route path="/interns" element={<CompanyInterns />} />
+          <Route path="/code" element={<AttendanceCode />} />
+          <Route path="/verification" element={<VerificationCenter />} />
+          <Route path="/rules" element={<EligibilityRules />} />
           <Route path="/completion" element={<Completion />} />
           <Route path="/certificate/:id" element={<Certificate />} />
           <Route path="/verify/:certId?" element={<Verify />} />
