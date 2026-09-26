@@ -61,7 +61,6 @@ src/
 - [x] Eligibility rules per major, owned by the academic supervisor
 - [ ] Training courses axis (course management, registration, attendance, trainers)
 - [ ] Remaining roles: department head, trainer, system admin, senior management
-- [ ] Document uploads with applications
 - [ ] Richer dashboard: stats by college, department, major, semester
 - [ ] Notifications, Excel/PDF export, document uploads
 - [ ] Real backend: database, authentication, file storage, server-side signing key
