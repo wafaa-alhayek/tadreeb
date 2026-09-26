@@ -1,0 +1,52 @@
+import { companies, opportunities } from '../data.js'
+import { useLang } from '../i18n.jsx'
+import { useStore } from '../store.jsx'
+
+// The application lifecycle, in order, for the progress stepper
+export const STEPS = ['submitted', 'under_review', 'accepted', 'assigned']
+
+export function StatusBadge({ status }) {
+  const { t } = useLang()
+  return <span className={'badge s-' + status}>{t('status_' + status)}</span>
+}
+
+export default function MyApplications() {
+  const { t, L } = useLang()
+  const { state, userId } = useStore()
+  const mine = state.applications.filter((a) => a.studentId === userId)
+
+  return (
+    <>
+      <h1>{t('nav_applications')}</h1>
+      {mine.length === 0 && <p className="empty">{t('noApplications')}</p>}
+      <div className="stack">
+        {mine.map((a) => {
+          const op = opportunities.find((o) => o.id === a.oppId)
+          const idx = STEPS.indexOf(a.status)
+          return (
+            <article key={a.id} className="card">
+              <div className="row between">
+                <div>
+                  <h3>{L(op.title)}</h3>
+                  <p className="muted">
+                    {L(companies[op.companyId])} · {t('submittedOn')} {a.createdAt}
+                  </p>
+                </div>
+                <StatusBadge status={a.status} />
+              </div>
+              {idx >= 0 && (
+                <ol className="stepper">
+                  {STEPS.map((s, i) => (
+                    <li key={s} className={i <= idx ? 'done' : ''}>
+                      {t('status_' + s)}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </article>
+          )
+        })}
+      </div>
+    </>
+  )
+}
