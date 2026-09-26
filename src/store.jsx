@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { initialState, opportunities } from './data.js'
+import { approvedHours, finalScore, initialState, opportunities, students, users } from './data.js'
 
-const KEY = 'tadreeb-state-v1'
+const KEY = 'tadreeb-state-v2'
 const StoreContext = createContext(null)
 
 const today = () => new Date().toISOString().slice(0, 10)
@@ -87,6 +87,10 @@ export function StoreProvider({ children }) {
               start: start.toISOString().slice(0, 10),
               end: end.toISOString().slice(0, 10),
               requiredHours: opp.durationMonths * 120,
+              attendance: null,
+              finalReport: 'missing',
+              visits: { required: 2, done: 0 },
+              scores: { provider: null, academic: null, report: null },
               logs: [],
             },
           ],
@@ -102,6 +106,26 @@ export function StoreProvider({ children }) {
             : r,
         ),
       })),
+
+    issueCertificate: (recordId) =>
+      setState((s) => {
+        const r = s.records.find((x) => x.id === recordId)
+        const opp = opportunities.find((o) => o.id === r.oppId)
+        const cert = {
+          id: `TR-2026-${String(s.certificates.length + 1).padStart(4, '0')}`,
+          recordId,
+          studentId: r.studentId,
+          studentName: users.find((u) => u.id === r.studentId).name,
+          uniId: students[r.studentId].uniId,
+          major: students[r.studentId].major,
+          companyId: opp.companyId,
+          durationMonths: opp.durationMonths,
+          hours: approvedHours(r),
+          score: finalScore(r),
+          issuedOn: today(),
+        }
+        return { ...s, certificates: [...s.certificates, cert] }
+      }),
 
     setLogStatus: (recordId, logId, status) =>
       setState((s) => ({

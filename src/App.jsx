@@ -1,4 +1,4 @@
-import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
+import { Navigate, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
 import { users } from './data.js'
 import { useLang } from './i18n.jsx'
 import { useStore } from './store.jsx'
@@ -10,6 +10,8 @@ import Dashboard from './pages/Dashboard.jsx'
 import ReviewApplications from './pages/ReviewApplications.jsx'
 import SupervisorLogs from './pages/SupervisorLogs.jsx'
 import Verify from './pages/Verify.jsx'
+import Completion from './pages/Completion.jsx'
+import Certificate from './pages/Certificate.jsx'
 
 const navByRole = {
   student: [
@@ -20,6 +22,7 @@ const navByRole = {
   officer: [
     ['/dashboard', 'nav_dashboard'],
     ['/review', 'nav_review'],
+    ['/completion', 'nav_completion'],
   ],
   supervisor: [['/logs', 'nav_logs']],
 }
@@ -35,10 +38,38 @@ export function LangButton() {
   )
 }
 
-export default function App() {
+export const loginUsers = users.filter((u) => u.inLogin !== false)
+
+// Lets the presenter jump between demo accounts without logging out
+function RoleSwitcher() {
   const { t, L } = useLang()
-  const { userId, logout } = useStore()
+  const { userId, login } = useStore()
+  const navigate = useNavigate()
+  return (
+    <select
+      className="switcher"
+      value={userId}
+      aria-label={t('switchTo')}
+      title={t('switchTo')}
+      onChange={(e) => {
+        login(e.target.value)
+        navigate('/')
+      }}
+    >
+      {loginUsers.map((u) => (
+        <option key={u.id} value={u.id}>
+          {L(u.name)} — {t('role_' + u.role)}
+        </option>
+      ))}
+    </select>
+  )
+}
+
+export default function App() {
+  const { t } = useLang()
+  const { state, userId, logout } = useStore()
   const user = users.find((u) => u.id === userId)
+  const myCert = state.certificates.find((c) => c.studentId === userId)
 
   if (!user)
     return (
@@ -64,12 +95,10 @@ export default function App() {
               {t(key)}
             </NavLink>
           ))}
+          {myCert && <NavLink to={'/certificate/' + myCert.id}>{t('nav_certificate')}</NavLink>}
         </nav>
         <div className="userbox">
-          <div className="who">
-            <span>{L(user.name)}</span>
-            <small>{t('role_' + user.role)}</small>
-          </div>
+          <RoleSwitcher />
           <LangButton />
           <button className="btn ghost" onClick={logout}>
             {t('logout')}
@@ -84,6 +113,8 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/review" element={<ReviewApplications />} />
           <Route path="/logs" element={<SupervisorLogs />} />
+          <Route path="/completion" element={<Completion />} />
+          <Route path="/certificate/:id" element={<Certificate />} />
           <Route path="/verify/:certId?" element={<Verify />} />
           <Route path="*" element={<Navigate to={homeByRole[user.role]} replace />} />
         </Routes>

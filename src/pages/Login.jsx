@@ -1,8 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { users } from '../data.js'
 import { useLang } from '../i18n.jsx'
 import { useStore } from '../store.jsx'
-import { LangButton } from '../App.jsx'
+import { LangButton, loginUsers } from '../App.jsx'
 
 export default function Login() {
   const { t, L } = useLang()
@@ -20,7 +19,7 @@ export default function Login() {
         <p className="muted">{t('tagline')}</p>
         <h2>{t('loginTitle')}</h2>
         <div className="user-list">
-          {users.map((u) => (
+          {loginUsers.map((u) => (
             <button
               key={u.id}
               className="user-pick"

@@ -8,6 +8,34 @@ export function LogStatus({ status }) {
   return <span className={'badge l-' + status}>{t('log_' + status)}</span>
 }
 
+// Shows every log still needing attention plus the latest approved ones,
+// and folds older approved logs into a count so long trainings stay readable
+export function LogList({ logs, actions }) {
+  const { t } = useLang()
+  const SHOW_APPROVED = 3
+  const open = logs.filter((l) => l.status !== 'approved')
+  const approved = logs.filter((l) => l.status === 'approved')
+  const hidden = approved.length - SHOW_APPROVED
+  return (
+    <ul className="logs">
+      {[...open, ...approved.slice(0, SHOW_APPROVED)].map((l) => (
+        <li key={l.id}>
+          <div className="row between">
+            <strong>
+              {l.date} · {l.hours} {t('hoursUnit')}
+            </strong>
+            <LogStatus status={l.status} />
+          </div>
+          <p>{l.tasks}</p>
+          {l.skills && <small className="muted">{l.skills}</small>}
+          {actions && l.status === 'pending' && actions(l)}
+        </li>
+      ))}
+      {hidden > 0 && <li className="more">{t('approvedCount', { n: hidden })}</li>}
+    </ul>
+  )
+}
+
 export default function TrainingRecord() {
   const { t, L } = useLang()
   const { state, userId, addLog } = useStore()
@@ -92,20 +120,7 @@ export default function TrainingRecord() {
         <section className="card">
           <h3>{t('dailyLog')}</h3>
           {record.logs.length === 0 && <p className="empty">{t('noLogs')}</p>}
-          <ul className="logs">
-            {record.logs.map((l) => (
-              <li key={l.id}>
-                <div className="row between">
-                  <strong>
-                    {l.date} · {l.hours} {t('hours')}
-                  </strong>
-                  <LogStatus status={l.status} />
-                </div>
-                <p>{l.tasks}</p>
-                {l.skills && <small className="muted">{l.skills}</small>}
-              </li>
-            ))}
-          </ul>
+          <LogList logs={record.logs} />
         </section>
       </div>
     </>

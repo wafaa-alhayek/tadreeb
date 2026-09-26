@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { companies, majors } from '../data.js'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { companies, decodeCert, gradeLabel, majors } from '../data.js'
 import { useLang } from '../i18n.jsx'
 import { useStore } from '../store.jsx'
 import { LangButton } from '../App.jsx'
@@ -12,7 +12,13 @@ export default function Verify() {
   const { certId } = useParams()
   const navigate = useNavigate()
   const [input, setInput] = useState(certId || '')
-  const cert = certId && state.certificates.find((c) => c.id === certId.trim())
+  const [params] = useSearchParams()
+  const fromLink = params.get('d') && decodeCert(params.get('d'))
+  // Look the number up locally first; fall back to the data carried in the QR link
+  const cert =
+    certId &&
+    (state.certificates.find((c) => c.id === certId.trim()) ||
+      (fromLink && fromLink.id === certId ? fromLink : null))
 
   return (
     <div className="login">
@@ -54,10 +60,12 @@ export default function Verify() {
               <dd>{L(companies[cert.companyId])}</dd>
               <dt>{t('duration')}</dt>
               <dd>
-                {cert.durationMonths} {t('months')} · {cert.hours} {t('hours')}
+                {cert.durationMonths} {t('months')} · {cert.hours} {t('hoursUnit')}
               </dd>
               <dt>{t('result')}</dt>
-              <dd>{L(cert.result)}</dd>
+              <dd>
+                {L(gradeLabel(cert.score))} ({cert.score}%)
+              </dd>
               <dt>{t('certNumber')}</dt>
               <dd>{cert.id}</dd>
               <dt>{t('issuedOn')}</dt>

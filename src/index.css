@@ -140,7 +140,7 @@ details ul { margin: 0.5rem 0 0; padding-inline-start: 1.2rem; font-size: 0.9rem
 .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; display: grid; }
 .stat .num { font-size: 1.9rem; font-weight: 700; }
 .bars { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: 0.6rem; }
-.bars li { display: grid; grid-template-columns: 130px 1fr 30px; gap: 0.75rem; align-items: center; font-size: 0.9rem; }
+.bars li { display: grid; grid-template-columns: minmax(110px, 170px) 1fr 44px; gap: 0.75rem; align-items: center; font-size: 0.9rem; }
 .bar { block-size: 12px; background: var(--bg); border-radius: 999px; overflow: hidden; }
 .bar > div { block-size: 100%; border-radius: 999px; background: currentColor; }
 .num-sm { font-weight: 600; text-align: end; }
@@ -184,4 +184,64 @@ th { color: var(--muted); font-weight: 500; background: var(--bg); }
   .two-col { grid-template-columns: 1fr; }
   .who { display: none; }
   .bars li { grid-template-columns: 100px 1fr 24px; }
+}
+
+/* Phase 2: role switcher, completion checklist, certificate */
+.wrap { flex-wrap: wrap; }
+.note { margin-block-end: 1rem; font-size: 0.9rem; }
+.chip { font-size: 0.85rem; padding: 0.25rem 0.75rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+.switcher { inline-size: auto; max-inline-size: 260px; font-size: 0.85rem; padding: 0.4rem 0.5rem; }
+.two-col.even { grid-template-columns: 1fr 1fr; }
+.bar > div { background: var(--primary); }
+.bars li { cursor: default; }
+.logs .more { border-style: dashed; color: var(--muted); font-size: 0.85rem; text-align: center; }
+.btn.center { text-align: center; text-decoration: none; }
+
+.checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; font-size: 0.9rem; }
+.checklist li { display: flex; align-items: center; gap: 0.5rem; }
+.checklist .mark {
+  inline-size: 20px; block-size: 20px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 0.7rem; font-weight: 700;
+}
+.checklist .ok .mark { background: var(--primary-soft); color: var(--primary); }
+.checklist .no .mark { background: var(--danger-soft); color: var(--danger); }
+.checklist .no { color: var(--muted); }
+.checklist .detail { margin-inline-start: auto; color: var(--muted); font-size: 0.8rem; }
+.grade { padding-block: 0.5rem; border-block: 1px solid var(--border); }
+
+.certificate {
+  background: #fffdf8; color: #1c2230; max-inline-size: 760px; margin: 1rem auto 0; text-align: center;
+  padding: 2.5rem 2.5rem 2rem; border-radius: 6px; border: 10px double #0f766e;
+  display: grid; gap: 0.4rem; box-shadow: 0 8px 30px rgb(0 0 0 / 0.08);
+}
+.certificate .muted, .certificate small { color: #667085; }
+.cert-head { display: flex; justify-content: center; align-items: center; gap: 0.75rem; text-align: start; }
+.certificate .logo { background: #0f766e; }
+.cert-title { font-size: 1.8rem; color: #0f766e; margin: 1rem 0 0.5rem; }
+.cert-name { font-size: 1.6rem; font-weight: 700; margin: 0.25rem 0; }
+.cert-company { font-size: 1.2rem; font-weight: 600; }
+.cert-foot { display: flex; justify-content: space-between; align-items: flex-end; margin-block-start: 1.5rem; text-align: start; gap: 1rem; flex-wrap: wrap; }
+.cert-foot dl { margin: 0; display: grid; grid-template-columns: max-content auto; gap: 0.2rem 0.75rem; font-size: 0.9rem; }
+.cert-foot dt { color: #667085; }
+.cert-foot dd { margin: 0; font-weight: 600; }
+.qr { display: grid; justify-items: center; gap: 0.25rem; text-decoration: none; }
+.qr small { max-inline-size: 150px; text-align: center; }
+
+@media (max-width: 720px) {
+  .two-col.even { grid-template-columns: 1fr; }
+  .certificate { padding: 1.5rem 1rem; border-width: 6px; }
+  .cert-foot { justify-content: center; }
+}
+
+@media print {
+  .topbar, .no-print { display: none !important; }
+  body, .content { background: #fff; padding: 0; }
+  .certificate { box-shadow: none; margin: 0 auto; }
+}
+
+.nav a { white-space: nowrap; }
+.stats { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 1050px) {
+  .brand { flex: 1; }
+  .nav { order: 3; flex-basis: 100%; }
+  .stats { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }

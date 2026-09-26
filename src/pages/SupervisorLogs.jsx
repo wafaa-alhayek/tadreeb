@@ -1,7 +1,7 @@
 import { companies, opportunities, users } from '../data.js'
 import { useLang } from '../i18n.jsx'
 import { useStore } from '../store.jsx'
-import { LogStatus } from './TrainingRecord.jsx'
+import { LogList } from './TrainingRecord.jsx'
 
 export default function SupervisorLogs() {
   const { t, L } = useLang()
@@ -23,29 +23,19 @@ export default function SupervisorLogs() {
                 {L(op.title)} · {L(companies[op.companyId])}
               </p>
               {r.logs.length === 0 && <p className="empty">{t('noLogs')}</p>}
-              <ul className="logs">
-                {r.logs.map((l) => (
-                  <li key={l.id}>
-                    <div className="row between">
-                      <strong>
-                        {l.date} · {l.hours} {t('hours')}
-                      </strong>
-                      <LogStatus status={l.status} />
-                    </div>
-                    <p>{l.tasks}</p>
-                    {l.status === 'pending' && (
-                      <div className="actions">
-                        <button className="btn primary" onClick={() => setLogStatus(r.id, l.id, 'approved')}>
-                          {t('approve')}
-                        </button>
-                        <button className="btn" onClick={() => setLogStatus(r.id, l.id, 'returned')}>
-                          {t('returnLog')}
-                        </button>
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              <LogList
+                logs={r.logs}
+                actions={(l) => (
+                  <div className="actions">
+                    <button className="btn primary" onClick={() => setLogStatus(r.id, l.id, 'approved')}>
+                      {t('approve')}
+                    </button>
+                    <button className="btn" onClick={() => setLogStatus(r.id, l.id, 'returned')}>
+                      {t('returnLog')}
+                    </button>
+                  </div>
+                )}
+              />
             </section>
           )
         })}
